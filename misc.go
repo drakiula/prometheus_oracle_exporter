@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/mattn/go-oci8"
-	"github.com/prometheus/common/log"
+	_ "github.com/sijms/go-ora/v2"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -66,7 +66,7 @@ func loadConfig() bool {
 		log.Fatalf("error: %v", err)
 	}
 	pwd = path
-	content, err := ioutil.ReadFile(*configFile)
+	content, err := os.ReadFile(*configFile)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 		return false
@@ -82,7 +82,7 @@ func loadConfig() bool {
 
 func ReadAccess() {
 	var file = pwd + "/" + *accessFile
-	content, err := ioutil.ReadFile(file)
+	content, err := os.ReadFile(file)
 	if err == nil {
 		err := yaml.Unmarshal(content, &lastlog)
 		if err != nil {

@@ -2,12 +2,12 @@ package main
 
 import (
 	"bufio"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"log"
 )
 
 type Client struct {
@@ -123,7 +123,7 @@ func (e *Exporter) ScrapeAlertlog() {
 			info, err := os.Stat(config.Cfgs[conf].Alertlog[0].File)
 			file, err := os.Open(config.Cfgs[conf].Alertlog[0].File)
 			if err != nil {
-				log.Infoln(err)
+				log.Panic(err)
 			} else {
 				scanner := bufio.NewScanner(file)
 				for scanner.Scan() {
@@ -144,7 +144,7 @@ func (e *Exporter) ScrapeAlertlog() {
 					e.alertlog.WithLabelValues(config.Cfgs[conf].Database,
 						config.Cfgs[conf].Instance,
 						Errors[i].ora,
-						strings.ToValidUTF8(Errors[i].text,""),
+						strings.ToValidUTF8(Errors[i].text, ""),
 						Errors[i].ignore).Set(float64(Errors[i].count))
 					WriteLog(config.Cfgs[conf].Instance + " " + e.lastIp +
 						" (" + Errors[i].ignore + "/" + strconv.Itoa(Errors[i].count) + "): " +

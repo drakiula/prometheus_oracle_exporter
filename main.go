@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/mattn/go-oci8"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	_ "github.com/sijms/go-ora/v2"
 	"log"
 )
 
@@ -896,7 +896,10 @@ func (e *Exporter) Connect() {
 	for i, conf := range config.Cfgs {
 		// Close Connect from former scrape that not closed properly
 		if config.Cfgs[i].db != nil {
-			config.Cfgs[i].db.Close()
+			err := config.Cfgs[i].db.Close()
+			if err != nil {
+				return
+			}
 			config.Cfgs[i].db = nil
 		}
 		if len(conf.Connection) > 0 {
@@ -912,7 +915,7 @@ func (e *Exporter) Connect() {
 				} else {
 					config.Cfgs[i].db.Close()
 					e.up.WithLabelValues(conf.Database, conf.Instance).Set(0)
-					log.Errorln("Error connecting to database:", err)
+					log.Panic("Error connecting to database:", err)
 					//log.Infoln("Connect OK, Inital query failed: ", conf.Connection)
 				}
 			}
@@ -1087,9 +1090,9 @@ func (e *Exporter) Handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	flag.Parse()
-	log.Infoln("Starting Prometheus Oracle exporter " + Version)
+	log.Print("Starting Prometheus Oracle exporter " + Version)
 	if loadConfig() {
-		log.Infoln("Config loaded: ", *configFile)
+		log.Print("Config loaded: ", *configFile)
 		exporter := NewExporter()
 		prometheus.MustRegister(exporter)
 
@@ -1097,7 +1100,7 @@ func main() {
 
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { w.Write(landingPage) })
 
-		log.Infoln("Listening on", *listenAddress)
+		log.Print("Listening on", *listenAddress)
 		log.Fatal(http.ListenAndServe(*listenAddress, nil))
 	}
 }
