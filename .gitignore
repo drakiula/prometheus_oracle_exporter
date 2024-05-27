@@ -2,3 +2,9 @@ oracle.conf
 access.conf
 prometheus_oracle_exporter
 *.log
+
+### GoLand
+.idea
+*.iws
+*.iml
+*.ipr
